@@ -157,8 +157,8 @@ Item {
     }
     readonly property var activeItem: loader.item
 
-    visible: activeItem ? activeItem.visible : false
-    implicitWidth: visible && activeItem ? activeItem.implicitWidth : 0
+    visible: registryEntry !== null
+    implicitWidth: activeItem ? activeItem.implicitWidth : 0
     implicitHeight: root.barSize
     width: implicitWidth
     height: root.barSize
