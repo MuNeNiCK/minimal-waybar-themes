@@ -22,6 +22,7 @@ Item {
   readonly property int iconSlot: Style.bar.iconSlot
   readonly property int statusSlot: Style.bar.statusSlot
   readonly property color foreground: Color.bar.text
+  readonly property color mutedColor: Color.muted
   readonly property color barForeground: foreground
   readonly property color background: Color.bar.background
   readonly property color urgent: Color.bar.active
@@ -35,6 +36,9 @@ Item {
   property var moduleSlots: []
   property string home: Quickshell.env("HOME")
   property bool barHidden: false
+  property int cpuPercent: 0
+  property int memoryPercent: 0
+  property string mediaTitle: ""
 
   readonly property var layoutConfig: ({
     left: ["omarchy.menu", "omarchy.active-window"],
@@ -106,6 +110,32 @@ Item {
     stdout: SplitParser {
       onRead: function(line) { root.barHidden = String(line).trim() === "yes" }
     }
+  }
+
+  function usageIcon(percent) {
+    var icons = ["󰪞", "󰪟", "󰪠", "󰪡", "󰪢", "󰪣", "󰪤", "󰪥"]
+    return icons[Math.max(0, Math.min(7, Math.floor(Number(percent || 0) * 8 / 101)))]
+  }
+
+  Process {
+    id: v4StatusProbe
+    command: ["bash", "-c", "read _ u n s i w q x y z < /proc/stat; a=$((u+n+s+i+w+q+x+y)); b=$((u+n+s+q+x+y)); sleep 0.12; read _ u n s i w q x y z < /proc/stat; c=$((u+n+s+i+w+q+x+y)); d=$((u+n+s+q+x+y)); dt=$((c-a)); db=$((d-b)); cpu=0; ((dt>0)) && cpu=$((100*db/dt)); mem=$(free | awk '/^Mem:/ {printf \"%d\", 100*$3/$2}'); title=$(playerctl metadata title 2>/dev/null | head -n1 | tr '\\t' ' '); printf \"%s\\t%s\\t%s\\n\" \"$cpu\" \"$mem\" \"$title\""]
+    stdout: SplitParser {
+      onRead: function(line) {
+        var fields = String(line).replace(/\r$/, "").split("\t")
+        root.cpuPercent = Number(fields[0] || 0)
+        root.memoryPercent = Number(fields[1] || 0)
+        root.mediaTitle = fields.slice(2).join(" ").slice(0, 25)
+      }
+    }
+  }
+
+  Timer {
+    interval: 2000
+    running: true
+    repeat: true
+    triggeredOnStart: true
+    onTriggered: if (!v4StatusProbe.running) v4StatusProbe.running = true
   }
 
   FileView {
@@ -184,13 +214,13 @@ Item {
     }
 
     function focus(workspaceId) {
-      root.run("hyprctl dispatch " + root.shellQuote("hl.dsp.focus({ workspace = \\\"" + workspaceId + "\\\" })"))
+      root.run("hyprctl dispatch workspace " + workspaceId)
     }
 
     Row {
       id: row
       anchors.centerIn: parent
-      spacing: 3
+      spacing: 1.5
 
       Repeater {
         model: 8
@@ -202,30 +232,24 @@ Item {
           readonly property bool occupied: workspace !== null && workspace.toplevels.values.length > 0
           readonly property bool focused: Hyprland.focusedWorkspace !== null && Hyprland.focusedWorkspace.id === workspaceId
 
-          width: focused ? 18 : 12
-          height: 24
+          width: focused ? 25 : 24
+          height: 28
 
           Rectangle {
             anchors.centerIn: parent
-            width: parent.focused ? 16 : 6
-            height: parent.focused ? 16 : 6
-            radius: width / 2
-            color: parent.focused ? root.foreground : "transparent"
-            border.width: parent.focused ? 0 : 1
-            border.color: root.foreground
-            opacity: parent.focused || parent.occupied ? 1 : 0.45
+            width: parent.focused ? 22 : parent.width
+            height: parent.focused ? 20 : parent.height
+            radius: 18
+            color: parent.focused ? Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.20) : "transparent"
 
-            Rectangle {
-              visible: parent.parent.focused
+            Text {
               anchors.centerIn: parent
-              width: 5
-              height: 5
-              radius: 3
-              color: root.background
+              text: parent.parent.occupied || parent.parent.focused ? "" : ""
+              color: root.foreground
+              opacity: parent.parent.focused || parent.parent.occupied ? 1 : 0.5
+              font.family: "JetBrainsMono Nerd Font Propo"
+              font.pixelSize: 12
             }
-
-            Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.InOutCubic } }
-            Behavior on height { NumberAnimation { duration: 180; easing.type: Easing.InOutCubic } }
           }
 
           MouseArea {
@@ -234,6 +258,61 @@ Item {
             onClicked: dots.focus(parent.workspaceId)
           }
         }
+      }
+    }
+  }
+
+  component OmarchyButton: Item {
+    implicitWidth: 29
+    implicitHeight: 27
+
+    Text {
+      anchors.centerIn: parent
+      text: ""
+      color: root.foreground
+      font.family: "JetBrainsMono Nerd Font Propo"
+      font.pixelSize: 17
+    }
+
+    MouseArea {
+      anchors.fill: parent
+      acceptedButtons: Qt.LeftButton | Qt.RightButton
+      cursorShape: Qt.PointingHandCursor
+      onClicked: function(mouse) {
+        if (mouse.button === Qt.RightButton) root.run("xdg-terminal-exec")
+        else root.run("omarchy-shell shell toggle omarchy.menu '{\"menu\":\"root\"}'")
+      }
+    }
+  }
+
+  component V4ActiveWindow: Item {
+    id: activeWindow
+    readonly property var toplevel: ToplevelManager.activeToplevel
+    readonly property string appClass: toplevel ? String(toplevel.appId || "Unknown") : "Desktop"
+    readonly property string fullTitle: toplevel ? String(toplevel.title || toplevel.appId || "") : "Workspace " + (Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : "")
+    readonly property string shortTitle: fullTitle.length > 20 ? fullTitle.slice(0, 17) + "..." : fullTitle
+    implicitWidth: Math.max(classLabel.implicitWidth, titleLabel.implicitWidth) + 12
+    implicitHeight: 29
+
+    Column {
+      anchors.left: parent.left
+      anchors.verticalCenter: parent.verticalCenter
+      spacing: -2
+
+      Text {
+        id: classLabel
+        text: activeWindow.appClass
+        color: root.mutedColor
+        font.family: "JetBrainsMono Nerd Font Propo"
+        font.pixelSize: 10
+      }
+      Text {
+        id: titleLabel
+        text: activeWindow.shortTitle
+        color: root.foreground
+        font.family: "JetBrainsMono Nerd Font Propo"
+        font.pixelSize: 12
+        font.bold: true
       }
     }
   }
@@ -270,22 +349,15 @@ Item {
         spacing: 5
 
         Rectangle {
-          implicitWidth: menuSlot.implicitWidth + 10
+          implicitWidth: 29
           implicitHeight: 27
           radius: height / 2
           color: Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.10)
 
-          WidgetSlot {
-            id: menuSlot
-            anchors.centerIn: parent
-            widgetId: "omarchy.menu"
-          }
+          OmarchyButton { anchors.centerIn: parent }
         }
 
-        WidgetSlot {
-          widgetId: "omarchy.active-window"
-          settings: ({ maxWidth: 220 })
-        }
+        V4ActiveWindow { }
       }
 
       Row {
@@ -293,15 +365,41 @@ Item {
         spacing: 4
 
         Rectangle {
-          implicitWidth: mediaSlot.implicitWidth + 10
+          implicitWidth: center3Row.implicitWidth + 10
           implicitHeight: 27
           radius: 12
           color: Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.10)
 
-          WidgetSlot {
-            id: mediaSlot
+          Row {
+            id: center3Row
             anchors.centerIn: parent
-            widgetId: "omarchy.media"
+            spacing: 2
+
+            Text {
+              text: root.usageIcon(root.cpuPercent) + " "
+              color: root.foreground
+              font.family: "JetBrainsMono Nerd Font Propo"
+              font.pixelSize: 18
+            }
+            Text {
+              text: root.usageIcon(root.memoryPercent) + "  "
+              color: root.foreground
+              font.family: "JetBrainsMono Nerd Font Propo"
+              font.pixelSize: 18
+            }
+            Text {
+              text: root.mediaTitle !== "" ? "  " + root.mediaTitle + " " : "         No media           "
+              color: root.foreground
+              font.family: "JetBrainsMono Nerd Font Propo"
+              font.pixelSize: 12
+              font.bold: true
+
+              MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.run("playerctl play-pause")
+              }
+            }
           }
         }
 
