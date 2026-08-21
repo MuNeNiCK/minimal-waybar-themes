@@ -39,6 +39,8 @@ Item {
   property int cpuPercent: 0
   property int memoryPercent: 0
   property string mediaTitle: ""
+  property string activeWindowClass: "Desktop"
+  property string activeWindowTitle: "Workspace"
 
   readonly property var layoutConfig: ({
     left: ["omarchy.menu", "omarchy.active-window"],
@@ -136,6 +138,31 @@ Item {
     repeat: true
     triggeredOnStart: true
     onTriggered: if (!v4StatusProbe.running) v4StatusProbe.running = true
+  }
+
+  Process {
+    id: activeWindowProbe
+    command: ["bash", "-c", "window=$(hyprctl activewindow -j 2>/dev/null); address=$(jq -r '.address // empty' <<<\"$window\"); if [[ -z $address || $address == null ]]; then ws=$(hyprctl activeworkspace -j | jq -r '.id'); printf \"Desktop\\tWorkspace %s\\n\" \"$ws\"; else jq -r '[.class // \"Unknown\", .title // \"\"] | @tsv' <<<\"$window\"; fi"]
+    stdout: SplitParser {
+      onRead: function(line) {
+        var fields = String(line).replace(/\r$/, "").split("\t")
+        root.activeWindowClass = fields[0] || "Desktop"
+        var title = fields.slice(1).join(" ")
+        var appClass = root.activeWindowClass.toLowerCase()
+        if (appClass.indexOf("discord") !== -1 || appClass.indexOf("vesktop") !== -1) {
+          title = title.replace(/^\([0-9]+\)\s*/, "").replace(/^Discord\s*\|\s*/, "")
+        }
+        root.activeWindowTitle = title || root.activeWindowClass
+      }
+    }
+  }
+
+  Timer {
+    interval: 500
+    running: true
+    repeat: true
+    triggeredOnStart: true
+    onTriggered: if (!activeWindowProbe.running) activeWindowProbe.running = true
   }
 
   FileView {
@@ -287,9 +314,8 @@ Item {
 
   component V4ActiveWindow: Item {
     id: activeWindow
-    readonly property var toplevel: ToplevelManager.activeToplevel
-    readonly property string appClass: toplevel ? String(toplevel.appId || "Unknown") : "Desktop"
-    readonly property string fullTitle: toplevel ? String(toplevel.title || toplevel.appId || "") : "Workspace " + (Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : "")
+    readonly property string appClass: root.activeWindowClass
+    readonly property string fullTitle: root.activeWindowTitle
     readonly property string shortTitle: fullTitle.length > 20 ? fullTitle.slice(0, 17) + "..." : fullTitle
     implicitWidth: Math.max(classLabel.implicitWidth, titleLabel.implicitWidth) + 12
     implicitHeight: 29
@@ -380,12 +406,24 @@ Item {
               color: root.foreground
               font.family: "JetBrainsMono Nerd Font Propo"
               font.pixelSize: 18
+
+              MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.run("omarchy-launch-or-focus-tui btop")
+              }
             }
             Text {
               text: root.usageIcon(root.memoryPercent) + "  "
               color: root.foreground
               font.family: "JetBrainsMono Nerd Font Propo"
               font.pixelSize: 18
+
+              MouseArea {
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.run("omarchy-launch-or-focus-tui btop")
+              }
             }
             Text {
               text: root.mediaTitle !== "" ? "  " + root.mediaTitle + " " : "         No media           "
@@ -443,7 +481,7 @@ Item {
         implicitWidth: rightModules.implicitWidth + 10
         implicitHeight: 27
         radius: 12
-        color: Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.10)
+        color: "transparent"
 
         Row {
           id: rightModules
