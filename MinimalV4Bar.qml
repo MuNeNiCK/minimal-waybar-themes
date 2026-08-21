@@ -21,10 +21,8 @@ Item {
   readonly property int barSize: 35
   readonly property int iconSlot: Style.bar.iconSlot
   readonly property int statusSlot: Style.bar.statusSlot
-  readonly property int workspaceGlyphOffsetX: -1
-  readonly property int workspaceGlyphOffsetY: 1
   readonly property int menuGlyphOffsetX: -3
-  readonly property int menuGlyphOffsetY: 2
+  readonly property int menuGlyphOffsetY: 1
   readonly property color foreground: Color.bar.text
   readonly property color mutedColor: Color.muted
   readonly property color barForeground: foreground
@@ -274,15 +272,15 @@ Item {
             radius: 18
             color: parent.focused ? Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.20) : "transparent"
 
-            Text {
+            Rectangle {
               anchors.centerIn: parent
-              anchors.horizontalCenterOffset: root.workspaceGlyphOffsetX
-              anchors.verticalCenterOffset: root.workspaceGlyphOffsetY
-              text: parent.parent.occupied || parent.parent.focused ? "" : ""
-              color: root.foreground
+              width: 6
+              height: 6
+              radius: 3
+              color: parent.parent.occupied || parent.parent.focused ? root.foreground : "transparent"
+              border.width: parent.parent.occupied || parent.parent.focused ? 0 : 1
+              border.color: root.foreground
               opacity: parent.parent.focused || parent.parent.occupied ? 1 : 0.5
-              font.family: "JetBrainsMono Nerd Font Propo"
-              font.pixelSize: 12
             }
           }
 
