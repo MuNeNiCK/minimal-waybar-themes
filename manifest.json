@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "munenick.minimal-v4-bar",
+  "name": "Minimal V4 Bar",
+  "version": "1.0.0",
+  "author": "MuNeNiCK and atif-1402",
+  "license": "MIT",
+  "description": "An Omarchy 4 Quickshell reconstruction of Minimal Waybar V4.",
+  "kinds": ["bar"],
+  "entryPoints": {
+    "bar": "MinimalV4Bar.qml"
+  }
+}
