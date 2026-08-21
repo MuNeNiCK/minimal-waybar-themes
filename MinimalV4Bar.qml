@@ -240,7 +240,7 @@ Item {
       return null
     }
 
-    function focus(workspaceId) {
+    function focusWorkspace(workspaceId) {
       root.run("hyprctl dispatch " + root.shellQuote("hl.dsp.focus({ workspace = \"" + workspaceId + "\" })"))
     }
 
@@ -283,7 +283,7 @@ Item {
           MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-            onClicked: dots.focus(workspaceButton.workspaceId)
+            onClicked: dots.focusWorkspace(workspaceButton.workspaceId)
           }
         }
       }
