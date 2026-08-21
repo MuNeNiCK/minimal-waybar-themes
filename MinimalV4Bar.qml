@@ -322,6 +322,7 @@ Item {
 
     Column {
       anchors.left: parent.left
+      anchors.leftMargin: 6
       anchors.verticalCenter: parent.verticalCenter
       spacing: -2
 
@@ -370,7 +371,7 @@ Item {
 
       Row {
         anchors.left: parent.left
-        anchors.leftMargin: 8
+        anchors.leftMargin: 5
         anchors.verticalCenter: parent.verticalCenter
         spacing: 5
 
@@ -392,7 +393,7 @@ Item {
 
         Rectangle {
           implicitWidth: center3Row.implicitWidth + 10
-          implicitHeight: 27
+          implicitHeight: 28
           radius: 12
           color: Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.10)
 
@@ -443,7 +444,7 @@ Item {
 
         Rectangle {
           implicitWidth: workspaces.implicitWidth + 10
-          implicitHeight: 27
+          implicitHeight: 28
           radius: 12
           color: Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.10)
 
@@ -455,7 +456,7 @@ Item {
 
         Rectangle {
           implicitWidth: infoRow.implicitWidth + 10
-          implicitHeight: 27
+          implicitHeight: 28
           radius: 12
           color: Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.10)
 
@@ -476,7 +477,7 @@ Item {
 
       Rectangle {
         anchors.right: parent.right
-        anchors.rightMargin: 8
+        anchors.rightMargin: 10
         anchors.verticalCenter: parent.verticalCenter
         implicitWidth: rightModules.implicitWidth + 10
         implicitHeight: 27
