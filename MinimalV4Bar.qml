@@ -375,8 +375,8 @@ Item {
 
     Rectangle {
       anchors.fill: parent
-      anchors.leftMargin: 10
-      anchors.rightMargin: 10
+      anchors.leftMargin: 6
+      anchors.rightMargin: 6
       anchors.topMargin: 2
       anchors.bottomMargin: 2
       radius: height / 2
@@ -408,7 +408,7 @@ Item {
         Rectangle {
           anchors.verticalCenter: parent.verticalCenter
           implicitWidth: center3Row.implicitWidth + 10
-          implicitHeight: 28
+          implicitHeight: 27
           radius: 12
           color: Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.10)
 
@@ -463,7 +463,7 @@ Item {
         Rectangle {
           anchors.verticalCenter: parent.verticalCenter
           implicitWidth: workspaces.implicitWidth + 10
-          implicitHeight: 28
+          implicitHeight: 27
           radius: 12
           color: Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.10)
 
@@ -476,7 +476,7 @@ Item {
         Rectangle {
           anchors.verticalCenter: parent.verticalCenter
           implicitWidth: infoRow.implicitWidth + 10
-          implicitHeight: 28
+          implicitHeight: 27
           radius: 12
           color: Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.10)
 
