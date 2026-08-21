@@ -241,7 +241,7 @@ Item {
     }
 
     function focus(workspaceId) {
-      root.run("hyprctl dispatch " + root.shellQuote("hl.dsp.focus({ workspace = \\\"" + workspaceId + "\\\" })"))
+      root.run("hyprctl dispatch " + root.shellQuote("hl.dsp.focus({ workspace = \"" + workspaceId + "\" })"))
     }
 
     Row {
