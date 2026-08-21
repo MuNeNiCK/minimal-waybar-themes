@@ -21,8 +21,6 @@ Item {
   readonly property int barSize: 35
   readonly property int iconSlot: Style.bar.iconSlot
   readonly property int statusSlot: Style.bar.statusSlot
-  readonly property int menuGlyphOffsetX: -3
-  readonly property int menuGlyphOffsetY: 1
   readonly property color foreground: Color.bar.text
   readonly property color mutedColor: Color.muted
   readonly property color barForeground: foreground
@@ -299,13 +297,20 @@ Item {
     implicitHeight: 27
 
     Text {
+      id: menuGlyph
       anchors.centerIn: parent
-      anchors.horizontalCenterOffset: root.menuGlyphOffsetX
-      anchors.verticalCenterOffset: root.menuGlyphOffsetY
+      anchors.horizontalCenterOffset: -(menuGlyphMetrics.tightBoundingRect.x + menuGlyphMetrics.tightBoundingRect.width / 2 - implicitWidth / 2)
+      anchors.verticalCenterOffset: -(baselineOffset + menuGlyphMetrics.tightBoundingRect.y + menuGlyphMetrics.tightBoundingRect.height / 2 - implicitHeight / 2)
       text: ""
       color: root.foreground
       font.family: "JetBrainsMono Nerd Font Propo"
       font.pixelSize: 17
+    }
+
+    TextMetrics {
+      id: menuGlyphMetrics
+      font: menuGlyph.font
+      text: menuGlyph.text
     }
 
     MouseArea {
