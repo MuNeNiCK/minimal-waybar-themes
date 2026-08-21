@@ -21,7 +21,7 @@ Item {
   readonly property int barSize: 35
   readonly property int iconSlot: Style.bar.iconSlot
   readonly property int statusSlot: Style.bar.statusSlot
-  readonly property int menuOpticalOffsetX: -1
+  readonly property real menuOpticalOffsetX: -0.5
   readonly property color foreground: Color.bar.text
   readonly property color mutedColor: Color.muted
   readonly property color barForeground: foreground
@@ -389,6 +389,7 @@ Item {
         spacing: 5
 
         Rectangle {
+          anchors.verticalCenter: parent.verticalCenter
           implicitWidth: 27
           implicitHeight: 27
           radius: width / 2
@@ -405,6 +406,7 @@ Item {
         spacing: 4
 
         Rectangle {
+          anchors.verticalCenter: parent.verticalCenter
           implicitWidth: center3Row.implicitWidth + 10
           implicitHeight: 28
           radius: 12
@@ -459,6 +461,7 @@ Item {
         }
 
         Rectangle {
+          anchors.verticalCenter: parent.verticalCenter
           implicitWidth: workspaces.implicitWidth + 10
           implicitHeight: 28
           radius: 12
@@ -471,6 +474,7 @@ Item {
         }
 
         Rectangle {
+          anchors.verticalCenter: parent.verticalCenter
           implicitWidth: infoRow.implicitWidth + 10
           implicitHeight: 28
           radius: 12
