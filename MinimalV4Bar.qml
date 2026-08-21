@@ -21,6 +21,10 @@ Item {
   readonly property int barSize: 35
   readonly property int iconSlot: Style.bar.iconSlot
   readonly property int statusSlot: Style.bar.statusSlot
+  readonly property int workspaceGlyphOffsetX: -1
+  readonly property int workspaceGlyphOffsetY: 1
+  readonly property int menuGlyphOffsetX: -3
+  readonly property int menuGlyphOffsetY: 2
   readonly property color foreground: Color.bar.text
   readonly property color mutedColor: Color.muted
   readonly property color barForeground: foreground
@@ -272,6 +276,8 @@ Item {
 
             Text {
               anchors.centerIn: parent
+              anchors.horizontalCenterOffset: root.workspaceGlyphOffsetX
+              anchors.verticalCenterOffset: root.workspaceGlyphOffsetY
               text: parent.parent.occupied || parent.parent.focused ? "" : ""
               color: root.foreground
               opacity: parent.parent.focused || parent.parent.occupied ? 1 : 0.5
@@ -296,6 +302,8 @@ Item {
 
     Text {
       anchors.centerIn: parent
+      anchors.horizontalCenterOffset: root.menuGlyphOffsetX
+      anchors.verticalCenterOffset: root.menuGlyphOffsetY
       text: ""
       color: root.foreground
       font.family: "JetBrainsMono Nerd Font Propo"
