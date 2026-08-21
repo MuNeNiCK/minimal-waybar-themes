@@ -241,7 +241,7 @@ Item {
     }
 
     function focus(workspaceId) {
-      root.run("hyprctl dispatch workspace " + workspaceId)
+      root.run("hyprctl dispatch " + root.shellQuote("hl.dsp.focus({ workspace = \\\"" + workspaceId + "\\\" })"))
     }
 
     Row {
@@ -253,6 +253,7 @@ Item {
         model: 8
 
         Item {
+          id: workspaceButton
           required property int index
           readonly property int workspaceId: index + 1
           readonly property var workspace: dots.workspaceById(workspaceId)
@@ -282,7 +283,7 @@ Item {
           MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-            onClicked: dots.focus(parent.workspaceId)
+            onClicked: dots.focus(workspaceButton.workspaceId)
           }
         }
       }
@@ -403,6 +404,7 @@ Item {
             spacing: 2
 
             Text {
+              anchors.verticalCenter: parent.verticalCenter
               text: root.usageIcon(root.cpuPercent) + " "
               color: root.foreground
               font.family: "JetBrainsMono Nerd Font Propo"
@@ -415,6 +417,7 @@ Item {
               }
             }
             Text {
+              anchors.verticalCenter: parent.verticalCenter
               text: root.usageIcon(root.memoryPercent) + "  "
               color: root.foreground
               font.family: "JetBrainsMono Nerd Font Propo"
@@ -427,6 +430,7 @@ Item {
               }
             }
             Text {
+              anchors.verticalCenter: parent.verticalCenter
               text: root.mediaTitle !== "" ? "  " + root.mediaTitle + " " : "         No media           "
               color: root.foreground
               font.family: "JetBrainsMono Nerd Font Propo"
