@@ -42,6 +42,7 @@ Item {
   property string mediaTitle: ""
   property string activeWindowClass: "Desktop"
   property string activeWindowTitle: "Workspace"
+  property bool gameModeEnabled: false
 
   readonly property var layoutConfig: ({
     left: ["omarchy.menu", "omarchy.active-window"],
@@ -120,6 +121,15 @@ Item {
     return icons[Math.max(0, Math.min(7, Math.floor(Number(percent || 0) * 8 / 101)))]
   }
 
+  function toggleGameMode() {
+    var effectsEnabled = gameModeEnabled
+    var lua = "hl.config({ animations = { enabled = " + (effectsEnabled ? "true" : "false") + " }, decoration = { blur = { enabled = " + (effectsEnabled ? "true" : "false") + " } } })"
+    var stateFile = root.shellQuote(root.home + "/.cache/hypr_gamemode")
+    var updateState = effectsEnabled ? "rm -f " + stateFile : "touch " + stateFile
+    root.run("hyprctl eval " + root.shellQuote(lua) + " && " + updateState)
+    gameModeEnabled = !effectsEnabled
+  }
+
   Process {
     id: v4StatusProbe
     command: ["bash", "-c", "read _ u n s i w q x y z < /proc/stat; a=$((u+n+s+i+w+q+x+y)); b=$((u+n+s+q+x+y)); sleep 0.12; read _ u n s i w q x y z < /proc/stat; c=$((u+n+s+i+w+q+x+y)); d=$((u+n+s+q+x+y)); dt=$((c-a)); db=$((d-b)); cpu=0; ((dt>0)) && cpu=$((100*db/dt)); mem=$(free | awk '/^Mem:/ {printf \"%d\", 100*$3/$2}'); title=$(playerctl metadata title 2>/dev/null | head -n1 | tr '\\t' ' '); printf \"%s\\t%s\\t%s\\n\" \"$cpu\" \"$mem\" \"$title\""]
@@ -139,6 +149,22 @@ Item {
     repeat: true
     triggeredOnStart: true
     onTriggered: if (!v4StatusProbe.running) v4StatusProbe.running = true
+  }
+
+  Process {
+    id: gameModeProbe
+    command: ["bash", "-c", "[[ -f $HOME/.cache/hypr_gamemode ]] && echo yes || echo no"]
+    stdout: SplitParser {
+      onRead: function(line) { root.gameModeEnabled = String(line).trim() === "yes" }
+    }
+  }
+
+  Timer {
+    interval: 1000
+    running: true
+    repeat: true
+    triggeredOnStart: true
+    onTriggered: if (!gameModeProbe.running) gameModeProbe.running = true
   }
 
   Process {
@@ -357,6 +383,29 @@ Item {
     }
   }
 
+  component GameModeButton: Item {
+    implicitWidth: gameModeGlyph.implicitWidth + 8
+    implicitHeight: root.barSize
+
+    Text {
+      id: gameModeGlyph
+      anchors.left: parent.left
+      anchors.verticalCenter: parent.verticalCenter
+      text: ""
+      color: root.foreground
+      opacity: root.gameModeEnabled ? 1 : 0.8
+      font.family: "JetBrainsMono Nerd Font Propo"
+      font.pixelSize: 12
+      font.bold: true
+    }
+
+    MouseArea {
+      anchors.fill: parent
+      cursorShape: Qt.PointingHandCursor
+      onClicked: root.toggleGameMode()
+    }
+  }
+
   component BarSurface: PanelWindow {
     id: barWindow
 
@@ -489,6 +538,7 @@ Item {
               widgetId: "omarchy.clock"
               settings: ({ format: "hh:mm AP • ddd, dd/MM", formatAlt: "dddd, d MMMM yyyy" })
             }
+            GameModeButton { }
             WidgetSlot { widgetId: "omarchy.indicators" }
             WidgetSlot { widgetId: "omarchy.system-update" }
           }
