@@ -123,7 +123,9 @@ Item {
 
   function toggleGameMode() {
     var effectsEnabled = gameModeEnabled
-    var lua = "hl.config({ animations = { enabled = " + (effectsEnabled ? "true" : "false") + " }, decoration = { blur = { enabled = " + (effectsEnabled ? "true" : "false") + " } } })"
+    var activeOpacity = effectsEnabled ? "0.93" : "1.0"
+    var inactiveOpacity = effectsEnabled ? "0.92" : "1.0"
+    var lua = "hl.config({ animations = { enabled = " + (effectsEnabled ? "true" : "false") + " }, decoration = { active_opacity = " + activeOpacity + ", inactive_opacity = " + inactiveOpacity + ", blur = { enabled = " + (effectsEnabled ? "true" : "false") + " } } })"
     var stateFile = root.shellQuote(root.home + "/.cache/hypr_gamemode")
     var updateState = effectsEnabled ? "rm -f " + stateFile : "touch " + stateFile
     root.run("hyprctl eval " + root.shellQuote(lua) + " && " + updateState)
@@ -392,8 +394,8 @@ Item {
       anchors.left: parent.left
       anchors.verticalCenter: parent.verticalCenter
       text: ""
-      color: root.foreground
-      opacity: root.gameModeEnabled ? 1 : 0.8
+      color: root.gameModeEnabled ? Color.accent : root.foreground
+      opacity: 1
       font.family: "JetBrainsMono Nerd Font Propo"
       font.pixelSize: 12
       font.bold: true
