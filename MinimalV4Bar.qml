@@ -115,26 +115,6 @@ Item {
     onFileChanged: hiddenProbe.running = true
   }
 
-  IpcHandler {
-    target: "minimal-v4-bar"
-
-    function debugGeometry(): string {
-      var rows = []
-      for (var i = 0; i < root.moduleSlots.length; i++) {
-        var slot = root.moduleSlots[i]
-        rows.push({
-          id: slot.widgetId,
-          registered: slot.registryEntry !== null,
-          visible: slot.visible,
-          width: Math.round(slot.width),
-          itemWidth: slot.activeItem ? Math.round(slot.activeItem.implicitWidth || 0) : 0,
-          itemVisible: slot.activeItem ? slot.activeItem.visible : false
-        })
-      }
-      return JSON.stringify(rows)
-    }
-  }
-
   Variants {
     model: Quickshell.screens
 
