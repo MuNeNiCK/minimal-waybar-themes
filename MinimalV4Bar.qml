@@ -295,7 +295,7 @@ Item {
   }
 
   component OmarchyButton: Item {
-    implicitWidth: 29
+    implicitWidth: 27
     implicitHeight: 27
 
     Text {
@@ -383,9 +383,9 @@ Item {
         spacing: 5
 
         Rectangle {
-          implicitWidth: 29
+          implicitWidth: 27
           implicitHeight: 27
-          radius: height / 2
+          radius: width / 2
           color: Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.10)
 
           OmarchyButton { anchors.centerIn: parent }
