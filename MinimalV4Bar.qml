@@ -21,6 +21,7 @@ Item {
   readonly property int barSize: 35
   readonly property int iconSlot: Style.bar.iconSlot
   readonly property int statusSlot: Style.bar.statusSlot
+  readonly property int menuOpticalOffsetX: -1
   readonly property color foreground: Color.bar.text
   readonly property color mutedColor: Color.muted
   readonly property color barForeground: foreground
@@ -299,7 +300,7 @@ Item {
     Text {
       id: menuGlyph
       anchors.centerIn: parent
-      anchors.horizontalCenterOffset: -(menuGlyphMetrics.tightBoundingRect.x + menuGlyphMetrics.tightBoundingRect.width / 2 - implicitWidth / 2)
+      anchors.horizontalCenterOffset: -(menuGlyphMetrics.tightBoundingRect.x + menuGlyphMetrics.tightBoundingRect.width / 2 - implicitWidth / 2) + root.menuOpticalOffsetX
       anchors.verticalCenterOffset: -(baselineOffset + menuGlyphMetrics.tightBoundingRect.y + menuGlyphMetrics.tightBoundingRect.height / 2 - implicitHeight / 2)
       text: ""
       color: root.foreground
